@@ -80,7 +80,7 @@ Module Server
                     Case "sc_handshake"
                         'if Abfrage zum User bzw IP einbauen!
                         con.status = 1
-                        con.streamw.WriteLine("TTT§sc_handshake§Test" & con.status)
+                        con.streamw.WriteLine("TTT§sc_handshake§" & con.status)
                         con.streamw.Flush()
                         If con.status = 0 Then
                             list.Remove(con)
@@ -92,16 +92,17 @@ Module Server
                     Case "login_request"
                         'if Abfrage zum schauen ob User existiert bzw neu anlegen, Format in Datei = User;MD5 Hash - Vl für File Zeugs eigenes Modul nehmen.
                         ' con.nick den nick eintragen - con.status setzen auf false wenn PW falsch, sonst true beibehalten.
-                        con.streamw.WriteLine("login_result" & "\" & con.status)
+                        con.nick = Input(2)
+                        con.streamw.WriteLine("login_result" & "§" & con.status)
                         con.streamw.Flush()
-                        con.streamw.WriteLine("room_list" & "\" & "lobby, help, games, dinner, afk")
+                        con.streamw.WriteLine("room_list" & "§" & "lobby, help, games, dinner, afk")
                         con.streamw.Flush()
                         If con.status = 0 Then
                             list.Remove(con)
                             ClientLog("Login from " & con.nick & " failed.")
                         Else
                             ClientLog("Login from " & con.nick & " finished.")
-                            SendToAllClients("login_user\" & con.nick)
+                            SendToAllClients("login_user§" & con.nick)
                             con.room = "lobby"
                         End If
 
@@ -109,21 +110,21 @@ Module Server
                         'Vielleicht Spamfilter einbauen, manche Schlagwörter filten und erstetzen, bzw User kicken.
                         'Chat an alle Clients weiter senden.
                         If con.room = "afk" Then
-                            con.streamw.WriteLine("chat_event\" & "You are in the AFK Channel. You can´t write." & "\" & con.nick & "\" & con.room)
+                            con.streamw.WriteLine("chat_event§" & "You are in the AFK Channel. You can´t write." & "\" & con.nick & "\" & con.room)
                         Else
-                            SendToAllClients("chat_event\" & "chat...." & "\" & con.nick & "\" & con.room)
+                            SendToAllClients("chat_event§" & Input(2) & "§" & con.nick & "§" & con.room)
                         End If
 
                     Case "get_infos"
                         'Willste Info? Bekommste.
-                        con.streamw.WriteLine("send_infos\" & onlinenumber & "\" & serverversion)
+                        con.streamw.WriteLine("send_infos§" & onlinenumber & "§" & serverversion)
                         con.streamw.Flush()
 
                     Case "change_room"
-                        con.room = "lobby"
+                        con.room = Input(2)
 
                     Case "my_room"
-                        con.streamw.WriteLine("current_room\" & con.room)
+                        con.streamw.WriteLine("current_room§" & con.room)
                         con.streamw.Flush()
 
                 End Select
@@ -131,7 +132,7 @@ Module Server
 
             Catch
                 list.Remove(con)
-                SendToAllClients("disconnect" & "\" & con.nick)
+                SendToAllClients("disconnect" & "§" & con.nick)
                 Exit Do
             End Try
         Loop
